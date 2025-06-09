@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  be:
+    build:
+      context: ./be
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+  fe:
+    build:
+      context: ./fe
+    ports:
+      - "3000:3000"
