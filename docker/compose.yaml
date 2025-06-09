@@ -10,6 +10,13 @@ services:
       - "15432:5432"
     volumes:
       - ../logs/postgresdb:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jikim -d basic"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   be:
     build:
@@ -24,13 +31,27 @@ services:
     volumes:
       - ../logs/be:/app/logs
     depends_on:
-      - postgresdb
+      postgresdb:
+          condition: service_healthy
+    networks:
+      - mynetwork
 
   fe:
     build:
       context: ../fe
     ports:
       - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - API_URL_LOCAL=http://be:8080
+      - WS_URL_LOCAL=ws://be:8080
+    networks:
+      - mynetwork
 
 volumes:
   pgdata:
+
+# 도커 네트워크 설정 (안해도 기본적으로 동일한 네트워크에 생성됨)
+networks:
+  mynetwork:
+    driver: bridge
