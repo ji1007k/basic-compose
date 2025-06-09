@@ -1,15 +1,36 @@
-version: '3.8'
-
 services:
+  postgresdb:
+    image: postgres:14
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: basic
+      POSTGRES_USER: jikim
+      POSTGRES_PASSWORD: jikim
+    ports:
+      - "15432:5432"
+    volumes:
+      - ../logs/postgresdb:/var/lib/postgresql/data
+
   be:
     build:
-      context: ./be
+      context: ../be
     ports:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresdb:5432/basic
+      - SPRING_DATASOURCE_USERNAME=jikim
+      - SPRING_DATASOURCE_PASSWORD=jikim
+    volumes:
+      - ../logs/be:/app/logs
+    depends_on:
+      - postgresdb
+
   fe:
     build:
-      context: ./fe
+      context: ../fe
     ports:
       - "3000:3000"
+
+volumes:
+  pgdata:

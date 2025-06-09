@@ -1,0 +1,6 @@
+[submodule "fe"]
+	path = fe
+	url = https://github.com/ji1007k/basic-fe-nextjs.git
+[submodule "be"]
+	path = be
+	url = https://github.com/ji1007k/basic-be-springboot.git
