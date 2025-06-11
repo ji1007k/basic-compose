@@ -43,8 +43,8 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - API_URL_LOCAL=http://be:8080
-      - WS_URL_LOCAL=ws://be:8080
+      - API_URL_LOCAL=https://be:8080
+      - WS_URL_LOCAL=wss://be:8080
     networks:
       - mynetwork
 
