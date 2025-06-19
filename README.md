@@ -77,7 +77,9 @@ docker ps
 - 리그 (/lol/leagues/sync)
 - 토너먼트 (/lol/tournaments/sync)
 - 팀 (/lol/teams/sync)
-- 경기일정 (/lol/matches/sync)
+- 경기일정
+  - 병렬 멀티 스레드 (/lol/batch/run-match-job)
+  - 싱글 스레드 (/lol/matches/sync)
 
 > ⚠️ **Swagger에서 요청 전 반드시 Servers 셀렉트박스에서 `http://localhost:8080 - Local Server`를 선택해 주세요.**
 
