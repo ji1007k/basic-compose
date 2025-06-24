@@ -1,0 +1,120 @@
+#/etc/nginx/sites-enabled/default 파일은 내용은 메인 nginx.conf의 http 블록 안에 포함됨.
+
+# 캐시 존 정의
+# 파일 경로, 디렉토리 구조, 메타데이터(메모리 10MB), 디스크 최대 사용량, 30분간 접근 없으면 삭제
+proxy_cache_path /var/cache/nginx
+                 levels=1:2
+                 keys_zone=static_cache:10m
+                 max_size=1g
+                 inactive=30m;
+
+# User-Agent 필터링용
+map $http_user_agent $block_bad_ua {
+    default 0;
+    ~*(curl|wget|python|scrapy|bot|requests|httpclient|python-requests|wpscan|zgrab|go-http-client|libwww|lwp|httrack|mass>
+    "" 1;
+}
+
+# 80 포트에서의 설정 (HTTP)
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+
+    # 보안 필터링 공통 설정 파일 로드
+    include /etc/nginx/snippets/security_rules.conf;
+
+    # HTTP → HTTPS 리디렉션
+    location /jikimi {
+        return 301 https://$host$request_uri;
+    }
+}
+       
+# 443 포트에서의 설정 (HTTPS)
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+
+    server_name _;
+
+    # SSL 인증서 경로
+    ssl_certificate /etc/nginx/ssl/cert.pem;
+    ssl_certificate_key /etc/nginx/ssl/cert.key;
+
+    # 보안 필터링 공통 설정 파일 로드
+    include /etc/nginx/snippets/security_rules.conf;
+
+    # swagger 관련 경로  프록시
+    location ~ ^/api/(v3/api-docs|swagger-ui) {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # API 프록시
+    location /api/ {
+        rewrite ^/api(/.*)$ $1 break;
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 웹소켓 프록시
+    location /ws/ {
+        proxy_pass http://localhost:8080/chat;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        # 자동 연결종료 기준시간(서버 무응답 대기 시간. 기본 60초)
+        proxy_read_timeout 1800;
+        proxy_send_timeout 1800;
+
+      
+    # 정적 파일 캐싱 - 경로 수정 및 우선순위 조정
+    location ~* ^/jikimi/.*\.(jpg|jpeg|png|css|js|ico|gif|svg|woff|woff2|ttf|eot)$ {
+        proxy_cache static_cache;
+        proxy_cache_valid 200 10m;
+        proxy_cache_valid 404 1m;
+        expires 1M;
+        add_header X-Cache-Status $upstream_cache_status;
+        add_header Cache-Control "public, max-age=2592000";
+
+        # 정적 파일은 URI 그대로 전달
+        proxy_pass https://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # 에러 페이지 처리
+        proxy_intercept_errors on;
+        error_page 404 = @jikimi_fallback;
+    }
+
+    # 일반 프록시 설정 - 가장 일반적이므로 마지막
+    location /jikimi {
+        proxy_pass https://localhost:3000/jikimi;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+
+    # 정적 파일 404 시 폴백
+    location @jikimi_fallback {
+        proxy_pass https://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # SSL 트래픽에서 gzip 비활성화
+    gzip off;
+}
