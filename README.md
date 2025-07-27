@@ -37,10 +37,12 @@ USE_REMOTE_API=false
 ### 3. Docker 빌드 및 컨테이너 실행
 docker 폴더(또는 compose.yaml이 위치한 폴더)로 이동한 후, 아래 명령어 실행:
 ```bash
+# 폴더 이동
 cd docker
-docker compose up -d --build
-# 특정 컨테이너만 띄우려면
-docker compose up -d be/fe
+# 백그라운드에서 컨테이너 빌드 및 실행
+docker compose up --build -d
+# 특정 컨테이너만 빌드하고 띄우려면
+docker compose up --build -d [서비스명]
 ```
 사용 포트:
 
@@ -72,10 +74,12 @@ docker ps
 ### 초기 데이터 안내
 초기 DB에는 **일정 관련 데이터가 포함되어 있지 않습니다.**  
 [API 문서 페이지](http://localhost:8080/api/swagger-ui/index.html)에서 아래 항목들을 **수동으로 동기화**해 주세요:
-- 리그
-- 토너먼트
-- 팀
+- 리그 (/lol/leagues/sync)
+- 토너먼트 (/lol/tournaments/sync)
+- 팀 (/lol/teams/sync)
 - 경기일정
+  - 병렬 멀티 스레드 (/lol/batch/run-match-job)
+  - 싱글 스레드 (/lol/matches/sync)
 
 > ⚠️ **Swagger에서 요청 전 반드시 Servers 셀렉트박스에서 `http://localhost:8080 - Local Server`를 선택해 주세요.**
 
