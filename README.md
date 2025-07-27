@@ -28,11 +28,16 @@ git submodule update --remote --merge
 --init: .gitmodules 파일에 정의된 서브모듈들을 초기화함 (디렉토리 생성 및 설정)
 
 ### 2. 프론트엔드 설정 변경
-fe/.env.production 파일에서 아래 항목을 수정:
+2-1. fe/.env.production 파일에서 아래 항목을 수정:
 ```bash
 USE_REMOTE_API=false
+#로컬 백엔드 컨테이너와 연동을 위한 설정
 ```
-로컬 백엔드 컨테이너와 연동을 위한 설정
+
+2-2. fe/.env.local 파일에서 아래 항목을 수정:
+```bash
+NODE_ENV=production
+```
 
 ### 3. Docker 빌드 및 컨테이너 실행
 docker 폴더(또는 compose.yaml이 위치한 폴더)로 이동한 후, 아래 명령어 실행:
