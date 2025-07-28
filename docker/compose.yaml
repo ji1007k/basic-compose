@@ -42,7 +42,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=production
+      - USE_REMOTE_API=false
       - API_URL_LOCAL=https://be:8080
       - WS_URL_LOCAL=wss://be:8080
     networks:
