@@ -1,4 +1,4 @@
-# JIKIM.GG 통합 개발 환경 (Docker Compose 기반)
+# JILoL.gg 통합 개발 환경 (Docker Compose 기반)
 > Next.js 프론트엔드와 Spring Boot 백엔드 서브모듈 연동 및 Docker Compose 테스트용 환경 구성
 
 
