@@ -72,52 +72,50 @@ docker ps
 
 ## 접속 주소
 - 프론트엔드: https://localhost:3000/jikimi
-- 백엔드 API 문서 (Swagger): http://localhost:8080/api/swagger-ui/index.html
+- 백엔드 API 문서 (Swagger): https://localhost:8080/api/swagger-ui/index.html
 ### 기본 로그인 계정
 - admin / admin
 - user / user
 ### 초기 데이터 안내
 초기 DB에는 **일정 관련 데이터가 포함되어 있지 않습니다.**  
-[API 문서 페이지](http://localhost:8080/api/swagger-ui/index.html)에서 아래 항목들을 **수동으로 동기화**해 주세요:
+[API 문서 페이지](https://localhost:8080/api/swagger-ui/index.html)에서 아래 항목들을 **수동으로 동기화**해 주세요:
 - 리그 (/lol/leagues/sync)
 - 토너먼트 (/lol/tournaments/sync)
 - 팀 (/lol/teams/sync)
 - 경기일정
-  - 병렬 멀티 스레드 (/lol/batch/run-match-job)
-  - 싱글 스레드 (/lol/matches/sync)
+  - 병렬 갱신 (/lol/batch/run-match-job)
+  - 순차 갱신 (/lol/matches/sync)
 
-> ⚠️ **Swagger에서 요청 전 반드시 Servers 셀렉트박스에서 `http://localhost:8080 - Local Server`를 선택해 주세요.**
+> ⚠️ **Swagger에서 요청 전 반드시 Servers 셀렉트박스에서 `https://localhost:8080 - Local Server`를 선택**
 
 ---
 
 ### 팀 정보 수동 동기화 시 인증 방법
 
-팀 정보 수동 동기화 API는 **CSRF 보호가 적용되어 있어**, 아래 중 **하나의 방식으로 인증을 선행해야 합니다.
+팀 정보 수동 동기화 API는 **CSRF 보호가 적용되어 있어**, 아래 중 하나의 방식으로 인증을 선행해야 합니다.
 
 #### 방법 1. Basic 인증 + CSRF 우회 헤더 사용
 
 1. Swagger 상단의 🔒 **Authorize** 버튼 클릭
 2. `BasicAuth` 입력란에 `admin / admin` 입력 후 **Authorize**
-3. **Auth API > `/auth/login`** 실행 (로그인 처리)
+3. **Auth API > `/auth/login`** 실행 (관리자 로그인)
 4. 다시 Swagger 상단의 🔒 **Authorize** 버튼 클릭
 5. `IgnoreCSRF` 입력란에 `skip` 입력 후 **Authorize**
 6. 이후 팀 정보 수동 동기화 API 요청 실행
 
 #### 방법 2. Basic 인증 + 실제 CSRF 토큰 검증
 
-1. Swagger 상단의 🔒 **Authorize** 버튼 클릭
-2. `BasicAuth` 입력란에 `admin / admin` 입력 후 **Authorize**
-3. **Auth API > `/auth/login`** 실행
-4. **CSRF API > `/csrf`** 실행
+1. [**방법 1**]의 1~3번 작업 실행
+2. **CSRF API > `/csrf`** 실행
     - 응답으로 받은 CSRF 토큰 값을 복사
-5. Swagger 상단의 🔒 **Authorize** 버튼 클릭
-6. `CSRF` 입력란에 복사한 토큰 값 입력 후 **Authorize**
-7. 이후 팀 정보 수동 동기화 API 요청 실행
+3. Swagger 상단의 🔒 **Authorize** 버튼 클릭
+4. `CSRF` 입력란에 복사한 토큰 값 입력 후 **Authorize**
+5. 이후 팀 정보 수동 동기화 API 요청 실행
 
 
 > 위 절차를 거치지 않으면 요청이 **403 Forbidden**으로 차단될 수 있습니다.
 > 
-> **백엔드 애플리케이션에서 직접 Swagger UI를 띄운 경우**에는 로그인 후 별도 설정 없이 바로 요청 가능
+> **백엔드 앱에서 직접 Swagger UI로 접속한 경우**에는 로그인 후 별도 설정 없이 바로 요청 가능
 
 
 
